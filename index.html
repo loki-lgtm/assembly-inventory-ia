@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assembly Inventory IA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #3b82f6;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #334155;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab:hover {
+            color: #e2e8f0;
+        }
+        
+        .tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #334155;
+        }
+        
+        .card h2 {
+            margin-bottom: 20px;
+            color: #e2e8f0;
+        }
+        
+        .preview {
+            background: #000;
+            border-radius: 8px;
+            min-height: 300px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .preview img, .preview canvas {
+            max-width: 100%;
+            max-height: 400px;
+        }
+        
+        .preview video {
+            width: 100%;
+            height: auto;
+        }
+        
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #475569;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #334155;
+        }
+        
+        .result {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .result h3 {
+            color: #3b82f6;
+            margin-bottom: 15px;
+        }
+        
+        .piece-count {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .piece-item {
+            background: #1e293b;
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #334155;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .alert-success {
+            background: #10b98120;
+            border: 1px solid #10b981;
+            color: #10b981;
+        }
+        
+        .alert-error {
+            background: #ef444420;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏭 Assembly Inventory IA</h1>
+            <p class="subtitle">Sistema de Gestão de Estoque com Visão Computacional</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('pieces')">📦 Projeto 1: Identificar Peças</button>
+            <button class="tab" onclick="switchTab('boxes')">📍 Projeto 2: Localizar Caixas</button>
+        </div>
+
+        <!-- Projeto 1: Identificar Peças -->
+        <div id="pieces" class="tab-content active">
+            <div class="grid">
+                <div class="card">
+                    <h2>Captura de Imagem</h2>
+                    <div class="preview" id="pieces-preview">
+                        <video id="pieces-video" autoplay playsinline style="display:none;"></video>
+                        <p style="color: #64748b;">Clique em "Capturar" ou "Upload"</p>
+                    </div>
+                    <div class="buttons">
+                        <button class="btn-primary" onclick="startCamera('pieces')">📷 Capturar</button>
+                        <button class="btn-secondary" onclick="document.getElementById('pieces-file').click()">📤 Upload</button>
+                        <button class="btn-secondary" onclick="loadDemo('pieces')">🎨 Demo</button>
+                    </div>
+                    <input type="file" id="pieces-file" accept="image/*" onchange="handleFileUpload(event, 'pieces')">
+                </div>
+
+                <div class="card">
+                    <h2>Resultado da Análise</h2>
+                    <div class="preview" id="pieces-result-preview">
+                        <p style="color: #64748b;">Aguardando análise...</p>
+                    </div>
+                    <div id="pieces-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projeto 2: Localizar Caixas -->
+        <div id="boxes" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>Captura de Caixa</h2>
+                    <div class="preview" id="boxes-preview">
+                        <video id="boxes-video" autoplay playsinline style="display:none;"></video>
+                        <p style="color: #64748b;">Clique em "Capturar" ou "Upload"</p>
+                    </div>
+                    <input type="text" id="current-location" placeholder="Localização Atual (ex: A-1-03)">
+                    <div class="buttons">
+                        <button class="btn-primary" onclick="startCamera('boxes')">📷 Capturar</button>
+                        <button class="btn-secondary" onclick="document.getElementById('boxes-file').click()">📤 Upload</button>
+                        <button class="btn-secondary" onclick="loadDemo('boxes')">🎨 Demo</button>
+                    </div>
+                    <input type="file" id="boxes-file" accept="image/*" onchange="handleFileUpload(event, 'boxes')">
+                </div>
+
+                <div class="card">
+                    <h2>Resultado da Localização</h2>
+                    <div class="preview" id="boxes-result-preview">
+                        <p style="color: #64748b;">Aguardando análise...</p>
+                    </div>
+                    <div id="boxes-result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <script>
+        const API_URL = 'http://localhost:5001';
+        let currentStream = null;
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab).classList.add('active');
+            
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+        }
+
+        async function startCamera(type) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                currentStream = stream;
+                
+                const video = document.getElementById(`${type}-video`);
+                video.srcObject = stream;
+                video.style.display = 'block';
+                video.parentElement.querySelector('p')?.remove();
+                
+                setTimeout(() => capturePhoto(type), 100);
+            } catch (error) {
+                alert('Erro ao acessar câmera: ' + error.message);
+            }
+        }
+
+        function capturePhoto(type) {
+            const video = document.getElementById(`${type}-video`);
+            const canvas = document.getElementById('canvas');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/jpeg');
+            processImage(imageData, type);
+            
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            video.style.display = 'none';
+        }
+
+        function handleFileUpload(event, type) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    processImage(e.target.result, type);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function loadDemo(type) {
+            showLoading(type);
+            try {
+                const response = await fetch(`${API_URL}/api/ml/generate-demo-image`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    processImage(data.image, type);
+                }
+            } catch (error) {
+                alert('Erro ao gerar demo: ' + error.message);
+            }
+        }
+
+        async function processImage(imageData, type) {
+            const preview = document.getElementById(`${type}-result-preview`);
+            preview.innerHTML = `<img src="${imageData}" alt="Image">`;
+            
+            showLoading(type);
+            
+            try {
+                if (type === 'pieces') {
+                    const response = await fetch(`${API_URL}/api/ml/identify-pieces`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: imageData })
+                    });
+                    
+                    const data = await response.json();
+                    displayPiecesResult(data);
+                    
+                } else if (type === 'boxes') {
+                    const currentLocation = document.getElementById('current-location').value;
+                    
+                    const response = await fetch(`${API_URL}/api/ml/locate-box`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: imageData, currentLocation })
+                    });
+                    
+                    const data = await response.json();
+                    displayBoxesResult(data);
+                }
+            } catch (error) {
+                document.getElementById(`${type}-result`).innerHTML = 
+                    `<div class="alert alert-error">❌ Erro: ${error.message}</div>`;
+            }
+        }
+
+        function showLoading(type) {
+            document.getElementById(`${type}-result`).innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Processando imagem...</p>
+                </div>
+            `;
+        }
+
+        function displayPiecesResult(data) {
+            const html = `
+                <div class="result">
+                    <h3>✅ ${data.total_detected} peças detectadas</h3>
+                    <div class="piece-count">
+                        ${Object.entries(data.pieces || {}).map(([type, count]) => `
+                            <div class="piece-item">
+                                <span style="text-transform: capitalize;">${type}</span>
+                                <strong>${count}</strong>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('pieces-result').innerHTML = html;
+        }
+
+        function displayBoxesResult(data) {
+            const isCorrect = data.isCorrect;
+            const alertClass = isCorrect === true ? 'alert-success' : (isCorrect === false ? 'alert-error' : '');
+            
+            const html = `
+                <div class="result">
+                    <h3>Código: ${data.code}</h3>
+                    <p><strong>Localização Correta:</strong> ${data.correctLocation}</p>
+                    ${data.currentLocation ? `<p><strong>Localização Atual:</strong> ${data.currentLocation}</p>` : ''}
+                    ${isCorrect !== null ? `
+                        <div class="alert ${alertClass}">
+                            ${isCorrect ? '✅ Caixa no local correto!' : '❌ Caixa no local errado!'}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('boxes-result').innerHTML = html;
+        }
+    </script>
+</body>
+</html>

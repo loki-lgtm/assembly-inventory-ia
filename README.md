@@ -4,7 +4,7 @@ Sistema de Gestão de Estoque Industrial com Visão Computacional e Machine Lear
 
 ---
 
-## 📋 O que é?
+##  O que é?
 
 Dois projetos integrados em uma interface web simples:
 
@@ -13,7 +13,7 @@ Dois projetos integrados em uma interface web simples:
 
 ---
 
-## 🚀 Como Usar no VS Code
+##  Como Usar no VS Code
 
 ### 1. Instalar Dependências Python
 
@@ -66,7 +66,7 @@ curl http://localhost:5001/health
 
 ---
 
-## 📁 Estrutura
+##  Estrutura
 
 ```
 assembly-inventory-ia/
@@ -85,7 +85,7 @@ assembly-inventory-ia/
 
 ---
 
-## 🎯 Endpoints da API
+##  Endpoints da API
 
 ### POST /api/ml/identify-pieces
 Identifica e conta peças na imagem
@@ -145,7 +145,7 @@ Gera imagem de demonstração
 
 ---
 
-## 🔧 Tecnologias
+##  Tecnologias
 
 - **Python 3.11**
 - **Flask** - API REST
@@ -157,7 +157,7 @@ Gera imagem de demonstração
 
 ---
 
-## 📊 Modelos
+##  Modelos
 
 ### SVM (Projeto 1)
 - **Acurácia:** 100%
@@ -174,7 +174,7 @@ Gera imagem de demonstração
 
 ---
 
-## 📝 Notas
+##  Notas
 
 - Não usa banco de dados (dados fictícios em memória)
 - Dataset sintético para demonstração
@@ -183,4 +183,4 @@ Gera imagem de demonstração
 
 ---
 
-**Assembly Inventory IA** 🚀
+**Assembly Inventory IA** 
